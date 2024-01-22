@@ -1,9 +1,10 @@
 from flask import Flask, render_template, url_for, request, redirect, session
 import psycopg2
-# import bcrypt
+import bcrypt
 
 app = Flask(__name__)
 app.secret_key = 'in.@123@'
+bcrypt = bcrypt(app)
 
 conn = psycopg2.connect(database="flask_app", user="shital", password='123456', host="localhost", port="5432")
 cursor = conn.cursor()
@@ -60,11 +61,29 @@ def login():
 
     return render_template('login.html')
 
-def reset():
-    if password['password'] != password:
-        password = request.form['password']
-            
-    
+
+@app.route('/login/reset', methods=['GET', 'POST'])
+def reset_password():
+    if request.method == 'POST':
+        username = request.form['username']
+        old_password = request.form['old_password']
+        new_password = request.form['new_password']
+
+        cursor.execute("SELECT * FROM flask_app WHERE username = %s;", (username,))
+        user = cursor.fetchone()
+
+        if user and bcrypt.check_password_hash(user[2], old_password):
+            hashed_password = bcrypt.generate_password_hash(new_password).decode('utf-8')
+
+            cursor.execute("UPDATE flask_app SET password = %s WHERE username = %s;", (hashed_password, username))
+            conn.commit()
+
+            return redirect(url_for('login'))
+        else:
+            return render_template('reset_password.html', error='Invalid username or old password.')
+
+    return render_template('reset_password.html')
+
 
 @app.route('/dashboard')
 def dashboard():

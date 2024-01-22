@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login Page</title>
+</head>
+<body>
+    <h1>Login Page</h1>
+    <form method="post" action="{{url_for('login')}}">
+        <input name="username" placeholder="username" required>
+        <br><br>
+        <input name="password" type="password" placeholder="password" required>
+        <br><br>
+        <button type="submit">Login</button>
+        <br><br>
+        <button type="submit">Reset Password</button>
+    </form>
+    <br><br>
+    <a href="{{url_for('register')}}">Don't have an account? Please sign up</a>
+</body>
+</html>

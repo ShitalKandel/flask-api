@@ -2,9 +2,10 @@ from flask import Flask, render_template, url_for, request, redirect, session
 import psycopg2
 import bcrypt
 
+
 app = Flask(__name__)
 app.secret_key = 'in.@123@'
-bcrypt = bcrypt(app)
+
 
 conn = psycopg2.connect(database="flask_app", user="shital", password='123456', host="localhost", port="5432")
 cursor = conn.cursor()
@@ -56,7 +57,10 @@ def login():
 
         if user:
             session['username'] = username
-            return redirect(url_for('dashboard'))
+            if user and not bcrypt.hashpw(user[2], password):
+                reset = reset_password()
+                return reset ,redirect(url_for('reset_password'))
+
         return "Please check your Username and Password"
 
     return render_template('login.html')
@@ -72,8 +76,8 @@ def reset_password():
         cursor.execute("SELECT * FROM flask_app WHERE username = %s;", (username,))
         user = cursor.fetchone()
 
-        if user and bcrypt.check_password_hash(user[2], old_password):
-            hashed_password = bcrypt.generate_password_hash(new_password).decode('utf-8')
+        if user and bcrypt.hashpw(user[2], old_password):
+            hashed_password = bcrypt.checkpw(new_password).decode('utf-8')
 
             cursor.execute("UPDATE flask_app SET password = %s WHERE username = %s;", (hashed_password, username))
             conn.commit()

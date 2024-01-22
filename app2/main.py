@@ -62,7 +62,6 @@ def login():
                 return reset ,redirect(url_for('reset_password'))
 
         return "Please check your Username and Password"
-
     return render_template('login.html')
 
 

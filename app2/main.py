@@ -29,19 +29,23 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        confirm = request.form['confirm']
 
-        password_hash = pbkdf2_sha256.hash(password)
+        if password != confirm:
+            return render_template('register.html', error='Passwords do not match.')
 
-        cursor.execute("SELECT * FROM flask_app WHERE (username, password) = (%s,%s);", (username,password_hash))
+        hashed_password = pbkdf2_sha256.hash(password)
+
+        cursor.execute("SELECT * FROM flask_app WHERE username = %s;", (username,))
         existing_user = cursor.fetchone()
 
-        if existing_user and pbkdf2_sha256.verify(password, existing_user[2]):
+        if existing_user:
             return render_template('register.html', error='Username already exists.')
 
-        cursor.execute("INSERT INTO flask_app (username, password) VALUES (%s, %s);", (username, password))
+        cursor.execute("INSERT INTO flask_app (username, password) VALUES (%s, %s);", (username, hashed_password))
         conn.commit()
 
-        return redirect(url_for('login')) 
+        return redirect(url_for('login'))
 
     return render_template('register.html')
 
@@ -52,16 +56,16 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        
-        hash_password = pbkdf2_sha256.verify(password,user['username'])
-        
-        cursor.execute("SELECT * FROM flask_app WHERE (username,password) = (%s,%s);", (username,hash_password))
+
+        cursor.execute("SELECT * FROM flask_app WHERE username = %s;", (username,))
         user = cursor.fetchone()
 
-        if user and pbkdf2_sha256.verify(password, user['username']):
+        if user and pbkdf2_sha256.verify(password, user[2]): 
             session['username'] = username
             return redirect(url_for('dashboard'))
+
         return "Please check your Username and Password"
+    
     return render_template('login.html')
 
 
@@ -70,13 +74,15 @@ def reset_password():
     if request.method == 'POST':
         username = request.form['username']
         new_password = request.form['new_password']
+        confirm_password = request.form['confirm_password']
 
         cursor.execute("SELECT * FROM flask_app WHERE username = %s;", (username,))
         user = cursor.fetchone()
 
-        if user and pbkdf2_sha256.hashpw(new_password.encode('utf-8'), user[2].encode('utf-8')):
+        if user and new_password == confirm_password:
+            hashed_password = pbkdf2_sha256.hash(new_password)
 
-            cursor.execute("UPDATE flask_app SET password = %s WHERE username = %s;", ( username))
+            cursor.execute("UPDATE flask_app SET password = %s WHERE username = %s;", (hashed_password, username))
             conn.commit()
 
             return redirect(url_for('login'))

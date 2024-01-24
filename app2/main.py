@@ -1,6 +1,9 @@
-from flask import Flask, render_template, url_for, request, redirect, session
+from flask import Flask, render_template, url_for, request, redirect, session,flash
 import psycopg2
+import os
 from passlib.hash import pbkdf2_sha256
+from werkzeug.utils import secure_filename
+
 
 app = Flask(__name__)
 app.secret_key = 'in.@123@'
@@ -12,7 +15,9 @@ cursor.execute('''
     CREATE TABLE IF NOT EXISTS flask_app (
         id SERIAL PRIMARY KEY,
         username VARCHAR,
-        password VARCHAR
+        password VARCHAR,
+        image varchar,
+        bio char
     );
 ''')
 conn.commit()
@@ -92,15 +97,45 @@ def reset_password():
     return render_template('reset_password.html')
 
 
-
 @app.route('/dashboard')
 def dashboard():
     if 'username' in session:
         return render_template('dashboard.html', username=session['username'])
     else:
-        return redirect(url_for('login'))
+        return render_template('unauthorized.html')
+
+
+# @app.route('/dashboard/upload-image', methods=['POST'])
+# def upload():
+#     file = request.files['file']
+
+#     if 'file' not in request.files:
+#         flash('No file part')
+#         return redirect(request.url)
+
+#     file = request.files['file']
+
+#     if file.filename == '':
+#         flash('No selected file')
+#         return redirect(request.url)
+
+#     if file:
+#         filename = secure_filename(file.filename)
+#         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+#         file.save(file_path)
+
+#         bio = request.form.get('bio-container')
+
+#         cursor.execute("INSERT INTO flask_app (image, bio) VALUES (%s, %s)", (filename, bio))
+#         conn.commit()
+
+#         return redirect(url_for('dashboard'))
     
-    
+
+@app.route('/dashboard/bio',methods='POST')
+def bio():
+    return redirect(url_for('dashboard'))
+
 
 @app.route('/logout')
 def logout():

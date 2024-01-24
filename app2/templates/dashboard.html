@@ -5,10 +5,107 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Dashboard Page</title>
+    <style>
+        .profile-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .profile-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .upload-btn-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            cursor: pointer;
+        }
+
+        .upload-btn-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+        }
+
+        .bio-container {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .bio-textarea {
+            width: 300px;
+            height: 100px;
+            margin-bottom: 10px;
+        }
+
+        .bio-btn-wrapper {
+            display: flex;
+            align-items: center;
+        }
+
+        .delete-btn {
+            
+            margin-left: 0px;
+            bottom: 50px;
+            cursor: pointer;
+            color: red;
+            }
+    
+            .save-btn {
+                left: 200px; 
+                bottom: 80px;
+                cursor: pointer;
+                color: white;
+                background: blue;
+            }
+    </style>
 </head>
 <body>
     {% if 'username' in session %}
         <h1>Welcome, {{ session['username'] }}!</h1>
+        
+        <div class="profile-container">
+            <div class="profile-image">
+                <div class="upload-btn-wrapper">
+                    <button class="btn" type="on-click">Upload</button>
+                    <input type="file" name="profile-image" id="profile-image" />
+                </div>
+            </div><br>
+            <div>
+            <button class="delete-btn">Delete Image</button><br>
+            <button class="save-btn">Save Image</button>
+            </div>
+            
+            
+            <div class="bio-container">
+                <textarea class="bio-textarea" placeholder="Enter your bio"></textarea>
+                <div class="bio-btn-wrapper">
+                    <button class="btn">Edit Bio</button>
+                    <button class="delete-btn">Delete Bio</button>
+                    <button class = "save-btn">Save Bio</button>
+                </div>
+            </div>
+        </div>
+
     {% else %}
         <h1>Unauthorized Access</h1>
         <a href="{{url_for('login')}}">Login</a>

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, request, redirect, session,flash
+from flask import Flask, render_template, url_for, request, redirect, session
 import psycopg2
 import os
 from passlib.hash import pbkdf2_sha256
@@ -16,11 +16,15 @@ cursor.execute('''
         id SERIAL PRIMARY KEY,
         username VARCHAR,
         password VARCHAR,
-        image varchar,
-        bio char
+        image BYTEA,
+        bio VARCHAR
     );
 ''')
 conn.commit()
+
+
+UPLOAD_FOLDER = "uploads"
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
 
@@ -97,45 +101,95 @@ def reset_password():
     return render_template('reset_password.html')
 
 
-@app.route('/dashboard')
+@app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     if 'username' in session:
-        return render_template('dashboard.html', username=session['username'])
+        
+        cursor = conn.cursor()
+        username = session['username']
+        cursor.execute("SELECT image, bio FROM flask_app WHERE username = %s;", (username,))
+        user_data = cursor.fetchone()
+        conn.commit()
+        return render_template('dashboard.html', username=username, user_data=user_data)
     else:
-        return render_template('unauthorized.html')
+        return "Unauthorized Access"
 
 
-# @app.route('/dashboard/upload-image', methods=['POST'])
-# def upload():
-#     file = request.files['file']
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if request.method == 'POST':
+        if 'username' in session:
+            username = session['username']
+            if 'profile-image' in request.files:
+                file = request.files['profile-image']
+                if file.filename:
+                    filename = secure_filename(file.filename)
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    file.save(file_path)
 
-#     if 'file' not in request.files:
-#         flash('No file part')
-#         return redirect(request.url)
+                    cursor = conn.cursor()
+                    cursor.execute("UPDATE flask_app SET image = %s WHERE username = %s;", (filename, username))
+                    conn.commit()
+                    return redirect(url_for('dashboard'))
+                else:
+                    return "Invalid file name"
+            else:
+                return "No 'profile-image' in the request"
+        else:
+            return "User not logged in"
+    else:
+        return "Only POST requests are allowed"
 
-#     file = request.files['file']
 
-#     if file.filename == '':
-#         flash('No selected file')
-#         return redirect(request.url)
-
-#     if file:
-#         filename = secure_filename(file.filename)
-#         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-#         file.save(file_path)
-
-#         bio = request.form.get('bio-container')
-
-#         cursor.execute("INSERT INTO flask_app (image, bio) VALUES (%s, %s)", (filename, bio))
-#         conn.commit()
-
-#         return redirect(url_for('dashboard'))
+@app.route('/delete_image', methods=['POST'])
+def delete_image():
+    if 'username' in session:
+        username = session['username']
+        cursor = conn.cursor()
+        cursor.execute("UPDATE flask_app SET image = BYTEA WHERE username = %s;", (username,))
+        conn.commit()
+        return redirect(url_for('dashboard'))
+    else:
+        return "User not logged in"
     
+def update_bio(username, bio):
+    conn = psycopg2.connect(cursor)
+    cursor = conn.cursor()
+    cursor.execute("UPDATE flask_app SET bio = %s WHERE username = %s;", (bio, username))
+    conn.commit()
+    cursor.close()
+    conn.close()
 
-@app.route('/dashboard/bio',methods='POST')
-def bio():
+def delete_bio(username):
+    conn = psycopg2.connect(cursor)
+    cursor = conn.cursor()
+    cursor.execute("UPDATE flask_app SET bio = VARCHAR WHERE username = %s;", (username,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    
+@app.route('/edit_bio', methods=['POST'])
+def edit_bio():
+    if 'username' in session:
+        username = session['username']
+        return render_template('dashboard.html', username=username, edit_bio=True)
+    else:
+        return redirect(url_for('dashboard'))
+
+@app.route('/save_bio', methods=['POST'])
+def save_bio():
+    if 'username' in session:
+        username = session['username']
+        new_bio = request.form.get('bio_textarea')
+        update_bio(username, new_bio)
     return redirect(url_for('dashboard'))
 
+@app.route('/delete_bio', methods=['POST'])
+def delete_bio_route():
+    if 'username' in session:
+        username = session['username']
+        delete_bio(username)
+    return redirect(url_for('dashboard'))
 
 @app.route('/logout')
 def logout():

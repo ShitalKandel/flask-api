@@ -69,6 +69,14 @@
             cursor: pointer;
             color: red;
             }
+
+            .save-img {
+                left: 200px; 
+                bottom: 80px;
+                cursor: pointer;
+                color: white;
+                background: blue;
+            }
     
             .save-btn {
                 left: 200px; 
@@ -83,17 +91,17 @@
     {% if 'username' in session %}
         <h1>Welcome, {{ session['username'] }}!</h1>
         
+        <form method="POST">
         <div class="profile-container">
             <div class="profile-image">
                 <div class="upload-btn-wrapper">
-                    <button class="btn" type="on-click">Upload</button>
+                    <button class="upload" type="submit">Upload</button>
                     <input type="file" name="profile-image" id="profile-image" />
                 </div>
             </div><br>
-            <div>
-            <button class="delete-btn">Delete Image</button><br>
-            <button class="save-btn">Save Image</button>
-            </div>
+
+            <button class="delete-img">Delete Image</button><br>
+            <button class="save-img">Save Image</button>
             
             
             <div class="bio-container">
@@ -105,6 +113,7 @@
                 </div>
             </div>
         </div>
+    </form>
 
     {% else %}
         <h1>Unauthorized Access</h1>

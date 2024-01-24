@@ -107,10 +107,24 @@ def dashboard():
         
         cursor = conn.cursor()
         username = session['username']
+        print(username)
         cursor.execute("SELECT image, bio FROM flask_app WHERE username = %s;", (username,))
         user_data = cursor.fetchone()
+        
+        cursor.execute("SELECT * FROM flask_app WHERE username = %s;",(username,))
+        user_data = cursor.fetchone()
         conn.commit()
-        return render_template('dashboard.html', username=username, user_data=user_data)
+        bio = user_data[-1]
+        
+        
+        dlt = delete_bio_route()
+        # print(dir(bio))
+        # conn.commit()
+        # if bio:
+
+        #     return render_template('dashboard.html', username=username, user_data=user_data, bio=bio)
+
+        return render_template('dashboard.html', username=username, user_data=user_data,bio=bio,dlt=dlt)
     else:
         return "Unauthorized Access"
 
@@ -159,7 +173,7 @@ def update_bio(username, bio):
     
 
 def delete_bio(username):
-    cursor.execute("UPDATE flask_app SET bio = VARCHAR WHERE username = %s;", (username,))
+    cursor.execute("UPDATE flask_app SET bio = Null WHERE username = %s;", (username))
     conn.commit()
     
     
@@ -179,19 +193,20 @@ def save_bio():
         update_bio(username, new_bio)
     return redirect(url_for('dashboard'))
 
-@app.route('/get_bio',methods=['GET'])
-def get_bio():
-    if 'username' in session:
-        username = session['username']
-        data = save_bio()
-    return render_template(('dashboard'),username,dataToRender=data)
+
 
 @app.route('/delete_bio', methods=['POST'])
 def delete_bio_route():
     if 'username' in session:
         username = session['username']
-        delete_bio(username)
+        delete = request.form.get('bio')
+        delete_bio(username,delete)
+
+        if delete =='Delete Bio':
+            return redirect(url_for('dashboard'))
+    
     return redirect(url_for('dashboard'))
+
 
 @app.route('/logout')
 def logout():

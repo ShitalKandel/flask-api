@@ -105,11 +105,12 @@
             
             
             <div class="bio-container">
-                <textarea class="textarea" name ="bio"placeholder="Enter your bio"></textarea>
+                <textarea class="textarea" name ="bio"placeholder="Enter your bio">{{bio}}</textarea>
                 <div class="bio-btn-wrapper">
                     <button class="btn">Edit Bio</button>
-                    <button class="delete-btn"><h2>{{dataToRender}}</h2>Delete Bio</button>
+                    <button class="delete-btn" onclick="deleteBio()">Delete Bio</button>
                     <button class = "save-btn" type="submit">Save Bio</button>
+                    
                 </div>
             </div>
         </div>

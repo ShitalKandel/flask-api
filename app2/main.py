@@ -153,20 +153,15 @@ def delete_image():
         return "User not logged in"
     
 def update_bio(username, bio):
-    conn = psycopg2.connect(cursor)
-    cursor = conn.cursor()
+    print(cursor)
     cursor.execute("UPDATE flask_app SET bio = %s WHERE username = %s;", (bio, username))
     conn.commit()
-    cursor.close()
-    conn.close()
+    
 
 def delete_bio(username):
-    conn = psycopg2.connect(cursor)
-    cursor = conn.cursor()
     cursor.execute("UPDATE flask_app SET bio = VARCHAR WHERE username = %s;", (username,))
     conn.commit()
-    cursor.close()
-    conn.close()
+    
     
 @app.route('/edit_bio', methods=['POST'])
 def edit_bio():
@@ -180,9 +175,16 @@ def edit_bio():
 def save_bio():
     if 'username' in session:
         username = session['username']
-        new_bio = request.form.get('bio_textarea')
+        new_bio = request.form.get('bio')
         update_bio(username, new_bio)
     return redirect(url_for('dashboard'))
+
+@app.route('/get_bio',methods=['GET'])
+def get_bio():
+    if 'username' in session:
+        username = session['username']
+        data = save_bio()
+    return render_template(('dashboard'),username,dataToRender=data)
 
 @app.route('/delete_bio', methods=['POST'])
 def delete_bio_route():

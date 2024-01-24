@@ -91,7 +91,7 @@
     {% if 'username' in session %}
         <h1>Welcome, {{ session['username'] }}!</h1>
         
-        <form method="POST">
+        <form method="POST" action="{{url_for('save_bio')}}">
         <div class="profile-container">
             <div class="profile-image">
                 <div class="upload-btn-wrapper">
@@ -100,16 +100,16 @@
                 </div>
             </div><br>
 
-            <button class="delete-img">Delete Image</button><br>
-            <button class="save-img">Save Image</button>
+            <button class="delete-img" >Delete Image</button><br>
+            <button class="save-img" >Save Image</button>
             
             
             <div class="bio-container">
-                <textarea class="bio-textarea" placeholder="Enter your bio"></textarea>
+                <textarea class="textarea" name ="bio"placeholder="Enter your bio"></textarea>
                 <div class="bio-btn-wrapper">
                     <button class="btn">Edit Bio</button>
-                    <button class="delete-btn">Delete Bio</button>
-                    <button class = "save-btn">Save Bio</button>
+                    <button class="delete-btn"><h2>{{dataToRender}}</h2>Delete Bio</button>
+                    <button class = "save-btn" type="submit">Save Bio</button>
                 </div>
             </div>
         </div>

@@ -116,15 +116,16 @@ def dashboard():
         conn.commit()
         bio = user_data[-1]
         
+    
         
-        dlt = delete_bio_route()
+        # dlt = delete_bio_route()
         # print(dir(bio))
         # conn.commit()
         # if bio:
 
         #     return render_template('dashboard.html', username=username, user_data=user_data, bio=bio)
 
-        return render_template('dashboard.html', username=username, user_data=user_data,bio=bio,dlt=dlt)
+        return render_template('dashboard.html', username=username, user_data=user_data,bio=bio)
     else:
         return "Unauthorized Access"
 
@@ -167,13 +168,12 @@ def delete_image():
         return "User not logged in"
     
 def update_bio(username, bio):
-    print(cursor)
     cursor.execute("UPDATE flask_app SET bio = %s WHERE username = %s;", (bio, username))
     conn.commit()
     
 
 def delete_bio(username):
-    cursor.execute("UPDATE flask_app SET bio = Null WHERE username = %s;", (username))
+    cursor.execute("UPDATE flask_app SET bio = Null WHERE username = %s;", (username,))
     conn.commit()
     
     
@@ -195,15 +195,12 @@ def save_bio():
 
 
 
-@app.route('/delete_bio', methods=['POST'])
+@app.route('/delete_bio', methods=['GET','POST'])
 def delete_bio_route():
     if 'username' in session:
         username = session['username']
-        delete = request.form.get('bio')
-        delete_bio(username,delete)
-
-        if delete =='Delete Bio':
-            return redirect(url_for('dashboard'))
+        bio = request.form.get('bio')
+        delete_bio(username)
     
     return redirect(url_for('dashboard'))
 

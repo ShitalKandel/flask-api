@@ -91,7 +91,7 @@
     {% if 'username' in session %}
         <h1>Welcome, {{ session['username'] }}!</h1>
         
-        <form method="POST" action="{{url_for('save_bio')}}">
+        <form method="POST" action="">
         <div class="profile-container">
             <div class="profile-image">
                 <div class="upload-btn-wrapper">
@@ -108,7 +108,8 @@
                 <textarea class="textarea" name ="bio"placeholder="Enter your bio">{{bio}}</textarea>
                 <div class="bio-btn-wrapper">
                     <button class="btn">Edit Bio</button>
-                    <button class="delete-btn" onclick="deleteBio()">Delete Bio</button>
+                    
+                    <button class="delete-btn" type="submit"  >Delete Bio</button>
                     <button class = "save-btn" type="submit">Save Bio</button>
                     
                 </div>
@@ -120,5 +121,30 @@
         <h1>Unauthorized Access</h1>
         <a href="{{url_for('login')}}">Login</a>
     {% endif %}
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Function to handle Delete Bio
+            document.querySelector(".delete-btn").addEventListener("click", function() {
+                // You can add any additional logic or confirmation here before submitting the form
+                document.querySelector("form").action = "{{ url_for('delete_bio_route') }}";
+                document.querySelector("form").submit();
+            });
+    
+            // Function to handle Save Bio
+            document.querySelector(".save-btn").addEventListener("click", function() {
+                // You can add any additional logic or validation here before submitting the form
+                document.querySelector("form").action = "{{ url_for('save_bio') }}";
+                document.querySelector("form").submit();
+            });
+    
+            // Function to handle Edit Bio
+            document.querySelector(".btn").addEventListener("click", function() {
+                // You can add any additional logic or UI changes for editing here
+                console.log("Editing bio...");
+            });
+        });
+    </script>
+    
 </body>
 </html>
